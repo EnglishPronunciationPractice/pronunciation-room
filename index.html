@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0a0c10" />
+  <meta name="description" content="Private British English pronunciation practice with personal teacher feedback." />
+  <title>The Pronunciation Room</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="topbar shell">
+    <a class="brand" href="#home" aria-label="The Pronunciation Room home">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="brand-copy"><strong>The Pronunciation Room</strong><small>British English · Modern RP</small></span>
+    </a>
+
+    <nav class="main-nav" aria-label="Primary navigation">
+      <button class="nav-link is-active" data-view="home">Library</button>
+      <button class="nav-link" data-view="progress">Progress</button>
+      <button class="nav-link" data-view="discussion">Discussion</button>
+      <button class="nav-link admin-only hidden" data-view="admin">Review</button>
+    </nav>
+
+    <div class="account-wrap">
+      <button id="accountButton" class="account-button" type="button">
+        <span class="status-dot"></span>
+        <span id="accountLabel">Sign in</span>
+      </button>
+      <div id="accountMenu" class="account-menu hidden">
+        <p id="accountEmail" class="account-email"></p>
+        <button id="signOutButton" type="button">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="view-home" class="view shell is-visible">
+      <div class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">Pronunciation, without the performance anxiety</span>
+          <h1>Read. Record.<br><span>Refine.</span></h1>
+          <p>Practise natural British English at your own pace. Submit a full reading when you are ready, then receive precise word-level feedback privately.</p>
+          <div class="hero-actions">
+            <button class="button button-primary" id="startFirstReading">Start Reading 01</button>
+            <button class="button button-ghost" data-view-target="progress">See how progress works</button>
+          </div>
+          <div class="trust-row">
+            <span><i>✓</i> No score chasing</span>
+            <span><i>✓</i> Private recordings</span>
+            <span><i>✓</i> Human feedback</span>
+          </div>
+        </div>
+
+        <div class="hero-panel glass-card">
+          <div class="mini-heading"><span>How it works</span><span class="live-chip">Simple by design</span></div>
+          <ol class="process-list">
+            <li><span>01</span><div><strong>Read naturally</strong><small>One story, split into short passages.</small></div></li>
+            <li><span>02</span><div><strong>Record when ready</strong><small>Listen back and re-record as often as you like.</small></div></li>
+            <li><span>03</span><div><strong>Submit privately</strong><small>Your email stays private. Your display name can appear in discussion.</small></div></li>
+            <li><span>04</span><div><strong>Refine specific words</strong><small>See what needs work, what is improving and what is now consistent.</small></div></li>
+          </ol>
+        </div>
+      </div>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <div><span class="eyebrow">Reading library</span><h2>Choose a story</h2></div>
+          <p>Each reading is intentionally short enough to repeat, but rich enough to expose rhythm, stress and connected speech.</p>
+        </div>
+        <div id="readingGrid" class="reading-grid"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
+      </section>
+    </section>
+
+    <section id="view-reading" class="view shell">
+      <button class="back-link" id="backToLibrary">← Back to library</button>
+      <div class="reading-layout">
+        <article class="reading-main glass-card">
+          <div class="reading-meta-line"><span id="readingNumber" class="eyebrow"></span><span id="readingLength" class="reading-length"></span></div>
+          <h2 id="readingTitle"></h2>
+          <p id="readingIntro" class="reading-intro"></p>
+          <div id="passageText" class="passage-text"></div>
+          <div class="reading-tip"><span>◌</span><p><strong>Try this:</strong> read for meaning first. On the second attempt, notice where your voice naturally rises, falls and links words together.</p></div>
+        </article>
+
+        <aside class="recorder-card glass-card sticky-card">
+          <div class="recorder-topline"><span class="eyebrow">Your recording</span><span id="recordingStateChip" class="state-chip">Ready</span></div>
+          <div class="visualiser-wrap">
+            <canvas id="visualiser" width="620" height="180" aria-label="Recording audio visualiser"></canvas>
+            <div id="recordingTime" class="recording-time">00:00</div>
+          </div>
+          <div class="recorder-controls">
+            <button id="recordButton" class="record-button" type="button" aria-label="Start recording"><span></span></button>
+            <div><strong id="recordPrompt">Start recording</strong><small id="recordSubPrompt">Your microphone stays in your browser until you submit.</small></div>
+          </div>
+          <div id="playbackArea" class="playback-area hidden">
+            <audio id="playbackAudio" controls preload="metadata"></audio>
+            <div class="playback-actions"><button id="rerecordButton" class="text-button" type="button">Record again</button><button id="openSubmitButton" class="button button-primary compact" type="button">Submit for feedback</button></div>
+          </div>
+          <div class="privacy-note"><span>🔒</span><p>Recordings are private. Other learners cannot listen to them.</p></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="view-progress" class="view shell">
+      <div class="page-heading"><span class="eyebrow">Your development</span><h1>Progress without a fake score.</h1><p>Participation and pronunciation are shown separately, so a missed reading never becomes a pronunciation “mistake”.</p></div>
+      <div id="progressSignedOut" class="empty-state glass-card">
+        <span class="empty-icon">◎</span><h3>Sign in to see your progress</h3><p>Your submission history and teacher feedback are tied to your email address.</p><button class="button button-primary" data-open-auth>Sign in by email</button>
+      </div>
+      <div id="progressContent" class="hidden">
+        <div class="metric-grid">
+          <div class="metric-card glass-card"><span>Reading sessions</span><strong id="metricSessions">0</strong><small>Participation</small></div>
+          <div class="metric-card glass-card"><span>Tracked words</span><strong id="metricWords">0</strong><small>Pronunciation feedback</small></div>
+          <div class="metric-card glass-card"><span>Improving</span><strong id="metricImproving">0</strong><small>Words moving forward</small></div>
+          <div class="metric-card glass-card"><span>Consistent</span><strong id="metricConsistent">0</strong><small>Repeatedly correct</small></div>
+        </div>
+        <div class="dashboard-grid">
+          <section class="glass-card dashboard-card"><div class="card-heading"><div><span class="eyebrow">Submissions</span><h3>Your reading history</h3></div></div><div id="submissionHistory" class="history-list"></div></section>
+          <section class="glass-card dashboard-card"><div class="card-heading"><div><span class="eyebrow">Word bank</span><h3>What you are refining</h3></div></div><div id="wordBank" class="word-bank"></div></section>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-discussion" class="view shell">
+      <div class="page-heading"><span class="eyebrow">Community corner</span><h1>Questions, observations, little wins.</h1><p>This is separate from pronunciation submissions. Your recording never appears here.</p></div>
+      <div class="discussion-layout">
+        <section class="glass-card dashboard-card">
+          <div class="card-heading"><div><span class="eyebrow">Conversation</span><h3>Latest discussion</h3></div></div>
+          <div id="commentsList" class="comments-list"></div>
+        </section>
+        <aside class="glass-card dashboard-card discussion-compose">
+          <span class="eyebrow">Join in</span><h3>Leave a comment</h3><p>Use your display name. Your email is never shown publicly.</p>
+          <label>Display name<input id="commentName" maxlength="40" placeholder="e.g. Gautham" /></label>
+          <label>Comment<textarea id="commentBody" maxlength="800" rows="5" placeholder="Ask a question or share something you noticed..."></textarea></label>
+          <button id="postCommentButton" class="button button-primary">Post comment</button>
+          <small id="commentAuthHint" class="form-hint">You need to be signed in before posting.</small>
+        </aside>
+      </div>
+    </section>
+
+    <section id="view-admin" class="view shell">
+      <div class="page-heading"><span class="eyebrow">Teacher review</span><h1>Listen closely. Mark only what matters.</h1><p>Word tags are structured feedback, not a score. Select exact words from the reading and track them over time.</p></div>
+      <div class="admin-layout">
+        <aside class="glass-card admin-queue"><div class="card-heading"><div><span class="eyebrow">Inbox</span><h3>Submissions</h3></div><span id="queueCount" class="count-pill">0</span></div><div id="adminQueue" class="admin-queue-list"></div></aside>
+        <section id="reviewPanel" class="glass-card review-panel"><div class="empty-review"><span>⌁</span><h3>Select a submission</h3><p>Choose a learner recording from the queue to begin reviewing it.</p></div></section>
+      </div>
+    </section>
+  </main>
+
+  <div id="submitModal" class="modal-shell hidden" role="dialog" aria-modal="true" aria-labelledby="submitModalTitle">
+    <div class="modal-backdrop" data-close-submit></div>
+    <div class="modal-card glass-card">
+      <button class="modal-close" data-close-submit aria-label="Close">×</button>
+      <span class="eyebrow">Private submission</span><h2 id="submitModalTitle">Send this reading for feedback</h2><p>We only use your email to identify your submissions and return feedback. It is never displayed publicly.</p>
+      <label>Display name<input id="submitName" maxlength="40" placeholder="What should we call you?" /></label>
+      <label>Email address<input id="submitEmail" type="email" autocomplete="email" placeholder="you@example.com" /></label>
+      <div class="modal-callout"><span>✦</span><p>If you are not signed in, we will email you a one-time sign-in link. Open it on this same browser and your recording will finish submitting automatically.</p></div>
+      <button id="submitRecordingButton" class="button button-primary full-width">Continue securely</button>
+      <div id="submitStatus" class="form-status"></div>
+    </div>
+  </div>
+
+  <div id="authModal" class="modal-shell hidden" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <div class="modal-backdrop" data-close-auth></div>
+    <div class="modal-card glass-card compact-modal">
+      <button class="modal-close" data-close-auth aria-label="Close">×</button>
+      <span class="eyebrow">Passwordless sign-in</span><h2 id="authModalTitle">Sign in with your email</h2><p>We will send you a one-time magic link. No password required.</p>
+      <label>Email address<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" /></label>
+      <button id="sendMagicLinkButton" class="button button-primary full-width">Email me a sign-in link</button>
+      <div id="authStatus" class="form-status"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <footer class="footer shell"><span>The Pronunciation Room</span><span>Practice privately · Improve deliberately</span></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
