@@ -715,8 +715,21 @@
       if (updated.error) return showToast('Voice file uploaded, but its reference could not be saved.');
     }
 
-    await client.from('submissions').update({status:'reviewed'}).eq('id',state.selectedSubmission.id);
-    showToast('Feedback saved and submission marked reviewed.');
+    const reviewed = await client.from('submissions').update({status:'reviewed'}).eq('id',state.selectedSubmission.id);
+    if (reviewed.error) return showToast('Feedback was saved, but the submission could not be marked reviewed.');
+    
+    const { data: noticeData, error: noticeError } = await client.functions.invoke('send-feedback-notification', {
+      body: { submission_id: state.selectedSubmission.id }
+    });
+    
+    if (noticeError) {
+      console.error('Feedback notification failed', noticeError);
+      showToast('Feedback published, but the email notification could not be sent.', 5200);
+    } else if (noticeData?.skipped) {
+      showToast('Feedback saved. The learner had already been notified.');
+    } else {
+      showToast('Feedback published and the learner was notified by email.', 4500);
+    }
     await loadAdminQueue();
     await openAdminSubmission(state.selectedSubmission.id);
   }
