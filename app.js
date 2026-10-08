@@ -424,7 +424,7 @@
     $('#metricCompleted').textContent=completed; $('#metricAvailable').textContent=`${eligible.length} available so far`; $('#metricConsistency').textContent=`${Math.round(consistency)}%`; $('#metricLongevity').textContent=longevity; $('#metricStreak').textContent=streak||0;
 
     const latest=snapshots.at(-1)||null;
-    const profileName=latest?.reader_profile||'Taking shape…'; $('#readerProfileName').textContent=profileName; setAvatar($('#profileAvatarLarge'),state.profile.avatar_id);
+    const profileName=latest?.reader_profile||'Taking shape…'; $('#readerProfileName').textContent=profileName; setAvatar($('#profileAvatarLarge'),state.profile.avatar_id); updateProfileLadder(profileName);
     $('#readerProfileDescription').textContent=profileName==='Taking shape…'?'Complete five reviewed readings to reveal your first pronunciation profile.':profileDescription(profileName);
     $('#progressScore').textContent=latest?.progress_score==null?'—':Math.round(Number(latest.progress_score)); $('#progressScoreHint').textContent=latest?.progress_score==null?'Your combined score appears after at least five readings and enough retention opportunities.':'Updated automatically from retention, mastery, consistency and longevity.';
     $('#scoreRetention').textContent=pct(latest?.retention_score); $('#scoreMastery').textContent=pct(latest?.mastery_score); $('#scoreConsistency').textContent=pct(latest?.overall_consistency??consistency); $('#scoreLongevity').textContent=latest?`${latest.longevity_points} pt${Number(latest.longevity_points)===1?'':'s'}`:`${longevity} pts`;
@@ -437,6 +437,14 @@
     const ownIds=new Set(submissions.map(s=>s.id)); const ownWords=(words||[]).filter(w=>ownIds.has(w.submission_id));
     const byReading=new Map(); for(const w of ownWords){const s=submissions.find(x=>x.id===w.submission_id);const key=s?.reading_id||'x';if(!byReading.has(key))byReading.set(key,{s,words:[]});byReading.get(key).words.push(w.word);}
     $('#focusWordHistory').innerHTML=byReading.size?[...byReading.values()].map(g=>`<div class="focus-group"><strong>Reading ${String(g.s?.readings?.number||'').padStart(2,'0')}</strong><small>${[...new Set(g.words)].map(esc).join(' · ')}</small></div>`).join(''):'<p class="muted">No focus words have been recorded yet.</p>';
+  }
+
+  function updateProfileLadder(name){
+    $$('.profile-stage[data-profile]').forEach(stage=>{
+      const current=stage.dataset.profile===name;
+      stage.classList.toggle('is-current',current);
+      if(current)stage.setAttribute('aria-current','step');else stage.removeAttribute('aria-current');
+    });
   }
 
   function profileDescription(name){return ({'Voice Builder':'You are building a stronger pronunciation foundation across the reading targets.','Clear Reader':'Your core pronunciation is becoming increasingly secure.','Polished Reader':'You are handling a wider range of pronunciation challenges reliably.','Expressive Reader':'Your pronunciation is highly secure across increasingly challenging material.','Eloquent Reader':'You are showing strong pronunciation control across the full challenge range.'})[name]||'Your pronunciation profile is developing.';}
