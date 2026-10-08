@@ -161,7 +161,7 @@
       try{ const j=ctx?await ctx.json():null; msg=j?.message||j?.error||msg; }catch{}
       return setStatus(status,msg,error?.context?.status===429?'error':'error');
     }
-    setStatus(status,data?.message||'Check your email for your secure sign-in link.','success');
+    setStatus(status,'Check your inbox. If this email is registered and active, your sign-in link is on its way. If you don’t receive one, contact your pronunciation coach.','success');
   }
 
   function buildAvatarPicker(){
