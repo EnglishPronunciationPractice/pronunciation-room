@@ -27,7 +27,8 @@
       <button class="nav-link admin-only hidden" data-view="admin">Admin</button>
     </nav>
     <div class="account-wrap">
-      <button id="accountButton" class="account-button" type="button"><span class="status-dot"></span><span id="accountLabel">Sign in</span></button>
+      <button id="coachSignInButton" class="coach-signin-button clean-button" type="button">Coach sign in</button>
+      <button id="accountButton" class="account-button" type="button"><span class="status-dot"></span><span id="accountLabel">Learner sign in</span></button>
       <div id="accountMenu" class="account-menu hidden"><p id="accountName" class="account-name"></p><p id="accountEmail" class="account-email"></p><button id="editProfileButton" class="learner-only hidden" type="button">Profile settings</button><button id="signOutButton" type="button">Sign out</button></div>
     </div>
   </header>
@@ -155,6 +156,49 @@
 
   <div id="authModal" class="modal-shell hidden" role="dialog" aria-modal="true">
     <div class="modal-backdrop" data-close-auth></div><div class="modal-card glass-card compact-modal"><button class="modal-close" data-close-auth>×</button><span class="eyebrow">Invite-only sign-in</span><h2>Return to your Pronunciation Room</h2><p>Enter the approved email address you were invited with. We’ll send a secure sign-in link. No password required.</p><label>Email address<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" /></label><button id="sendSignInButton" class="button button-primary full-width">Email my sign-in link</button><p class="form-status">If this email is registered and active, a secure sign-in link will be sent.</p><div id="authStatus" class="form-status"></div></div>
+  </div>
+
+  <div id="coachAuthModal" class="modal-shell hidden" role="dialog" aria-modal="true" aria-labelledby="coachAuthTitle">
+    <div class="modal-backdrop" data-close-coach-auth></div>
+    <div class="modal-card glass-card compact-modal">
+      <button class="modal-close" data-close-coach-auth aria-label="Close coach sign in">×</button>
+      <span class="eyebrow">Pronunciation coach</span>
+      <h2 id="coachAuthTitle">Coach sign in</h2>
+      <p>Use your coach email address and password to open the administration area.</p>
+      <label>Email address<input id="coachEmail" type="email" autocomplete="username" placeholder="you@example.com" /></label>
+      <label>Password<input id="coachPassword" type="password" autocomplete="current-password" placeholder="Your password" /></label>
+      <button id="coachSignInSubmitButton" class="button button-primary full-width" type="button">Sign in as coach</button>
+      <div class="auth-link-row"><button id="forgotCoachPasswordButton" class="text-button auth-secondary-link" type="button">Forgot password?</button></div>
+      <div id="coachAuthStatus" class="form-status"></div>
+    </div>
+  </div>
+
+  <div id="coachRecoveryModal" class="modal-shell hidden" role="dialog" aria-modal="true" aria-labelledby="coachRecoveryTitle">
+    <div class="modal-backdrop" data-close-coach-recovery></div>
+    <div class="modal-card glass-card compact-modal">
+      <button class="modal-close" data-close-coach-recovery aria-label="Close password recovery">×</button>
+      <span class="eyebrow">Coach account recovery</span>
+      <h2 id="coachRecoveryTitle">Reset your password</h2>
+      <p>Enter your coach email address. We’ll send a secure recovery link so you can choose a new password.</p>
+      <label>Coach email address<input id="coachRecoveryEmail" type="email" autocomplete="email" placeholder="you@example.com" /></label>
+      <button id="sendCoachRecoveryButton" class="button button-primary full-width" type="button">Send password reset link</button>
+      <p class="auth-security-copy">If the address belongs to a coach account, a recovery email will be sent.</p>
+      <div id="coachRecoveryStatus" class="form-status"></div>
+    </div>
+  </div>
+
+  <div id="passwordResetModal" class="modal-shell hidden" role="dialog" aria-modal="true" aria-labelledby="passwordResetTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card glass-card compact-modal">
+      <span class="eyebrow">Coach account recovery</span>
+      <h2 id="passwordResetTitle">Choose a new password</h2>
+      <p>Create a new password for your Pronunciation Room coach account.</p>
+      <label>New password<input id="newCoachPassword" type="password" autocomplete="new-password" minlength="10" placeholder="At least 10 characters" /></label>
+      <label>Confirm new password<input id="confirmCoachPassword" type="password" autocomplete="new-password" minlength="10" placeholder="Repeat your new password" /></label>
+      <button id="saveNewCoachPasswordButton" class="button button-primary full-width" type="button">Save new password</button>
+      <button id="cancelPasswordResetButton" class="text-button auth-cancel-link" type="button">Cancel and sign out</button>
+      <div id="passwordResetStatus" class="form-status"></div>
+    </div>
   </div>
 
   <div id="profileModal" class="modal-shell hidden" role="dialog" aria-modal="true">
