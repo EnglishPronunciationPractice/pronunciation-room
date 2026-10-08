@@ -1,6 +1,11 @@
 (() => {
   'use strict';
   const cfg = window.PRONUNCIATION_CONFIG || {};
+  const recoveryUrlHint = (() => {
+    const search = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/,''));
+    return search.get('type') === 'recovery' || hash.get('type') === 'recovery';
+  })();
   const client = window.supabase?.createClient?.(cfg.supabaseUrl, cfg.supabasePublishableKey, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
@@ -69,14 +74,18 @@
   async function init(){
     bindUI(); drawIdleVisualiser();
     if(!client){ showToast('Supabase could not load.'); return; }
-    const {data}=await client.auth.getSession(); state.session=data.session;
-    if(state.session && !(await enforceLocalInactivity())) state.session=null;
-    await refreshIdentity();
-    client.auth.onAuthStateChange(async (_event,session)=>{
+    client.auth.onAuthStateChange(async (event,session)=>{
       state.session=session;
+      if(event==='PASSWORD_RECOVERY'){
+        setTimeout(()=>openPasswordReset(),0);
+      }
       await refreshIdentity();
       if(session) touchActivity();
     });
+    const {data}=await client.auth.getSession(); state.session=data.session;
+    if(state.session && !(await enforceLocalInactivity())) state.session=null;
+    await refreshIdentity();
+    if(recoveryUrlHint && state.session) setTimeout(()=>openPasswordReset(),0);
     document.addEventListener('click',touchActivity,{passive:true});
     document.addEventListener('keydown',touchActivity,{passive:true});
   }
@@ -86,12 +95,23 @@
     $$('[data-view-target]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.viewTarget)));
     $$('[data-open-auth]').forEach(b=>b.addEventListener('click',openAuth));
     $$('[data-close-auth]').forEach(b=>b.addEventListener('click',closeAuth));
+    $$('[data-close-coach-auth]').forEach(b=>b.addEventListener('click',closeCoachAuth));
+    $$('[data-close-coach-recovery]').forEach(b=>b.addEventListener('click',closeCoachRecovery));
     $$('[data-close-profile]').forEach(b=>b.addEventListener('click',closeProfileModal));
     $$('[data-close-public-profile]').forEach(b=>b.addEventListener('click',()=>$('#publicProfileModal').classList.add('hidden')));
     $('#accountButton').addEventListener('click',accountAction);
+    $('#coachSignInButton').addEventListener('click',openCoachAuth);
     $('#signOutButton').addEventListener('click',signOut);
     $('#editProfileButton').addEventListener('click',()=>openProfileModal(false));
     $('#sendSignInButton').addEventListener('click',requestSignInLink);
+    $('#coachSignInSubmitButton').addEventListener('click',coachSignIn);
+    $('#forgotCoachPasswordButton').addEventListener('click',openCoachRecovery);
+    $('#sendCoachRecoveryButton').addEventListener('click',sendCoachRecovery);
+    $('#saveNewCoachPasswordButton').addEventListener('click',saveNewCoachPassword);
+    $('#cancelPasswordResetButton').addEventListener('click',cancelPasswordReset);
+    $('#coachPassword').addEventListener('keydown',e=>{if(e.key==='Enter')coachSignIn();});
+    $('#coachRecoveryEmail').addEventListener('keydown',e=>{if(e.key==='Enter')sendCoachRecovery();});
+    $('#confirmCoachPassword').addEventListener('keydown',e=>{if(e.key==='Enter')saveNewCoachPassword();});
     $('#saveProfileButton').addEventListener('click',saveProfile);
     $('#recordButton').addEventListener('click',toggleMainRecording);
     $('#rerecordButton').addEventListener('click',()=>resetMainRecording());
@@ -115,7 +135,9 @@
     if(!state.session){
       $('#signedOutHero').classList.remove('hidden'); $('#memberCurrent').classList.add('hidden');
       $$('.learner-nav,.learner-only,.admin-only').forEach(x=>x.classList.add('hidden'));
-      $('#accountButton').classList.remove('is-signed-in'); $('#accountLabel').textContent='Sign in';
+      $('#coachSignInButton').classList.remove('hidden');
+      $('#accountButton').classList.add('hidden');
+      $('#accountButton').classList.remove('is-signed-in'); $('#accountLabel').textContent='Account';
       return;
     }
     const {data:isAdmin}=await client.rpc('is_admin'); state.isAdmin=!!isAdmin;
@@ -130,8 +152,10 @@
       }
     }
     $('#signedOutHero').classList.add('hidden'); $('#memberCurrent').classList.remove('hidden');
+    $('#coachSignInButton').classList.add('hidden');
+    $('#accountButton').classList.remove('hidden');
     $('#accountButton').classList.add('is-signed-in');
-    $('#accountLabel').textContent=state.isAdmin?'Admin':(state.profile?.display_name||'Account');
+    $('#accountLabel').textContent=state.isAdmin?'Coach admin':(state.profile?.display_name||'Account');
     $('#accountName').textContent=state.isAdmin?'Administrator':(state.profile?.display_name||'Learner');
     $('#accountEmail').textContent=state.session.user.email||'';
     $$('.admin-only').forEach(x=>x.classList.toggle('hidden',!state.isAdmin));
@@ -149,8 +173,95 @@
 
   function accountAction(){ if(!state.session) return openAuth(); $('#accountMenu').classList.toggle('hidden'); }
   async function signOut(){ await client.auth.signOut(); localStorage.removeItem('pr_last_seen'); $('#accountMenu').classList.add('hidden'); setView('current'); }
-  function openAuth(){ $('#authModal').classList.remove('hidden'); $('#authEmail').focus(); }
+  function openAuth(){ closeCoachAuth(); closeCoachRecovery(); $('#authModal').classList.remove('hidden'); $('#authEmail').focus(); }
   function closeAuth(){ $('#authModal').classList.add('hidden'); setStatus($('#authStatus')); }
+  function openCoachAuth(){
+    closeAuth(); closeCoachRecovery();
+    $('#coachAuthModal').classList.remove('hidden');
+    setStatus($('#coachAuthStatus'));
+    setTimeout(()=>$('#coachEmail').focus(),0);
+  }
+  function closeCoachAuth(){ $('#coachAuthModal').classList.add('hidden'); setStatus($('#coachAuthStatus')); }
+  function openCoachRecovery(){
+    const existing=$('#coachEmail').value.trim();
+    closeCoachAuth();
+    $('#coachRecoveryModal').classList.remove('hidden');
+    if(existing) $('#coachRecoveryEmail').value=existing;
+    setStatus($('#coachRecoveryStatus'));
+    setTimeout(()=>$('#coachRecoveryEmail').focus(),0);
+  }
+  function closeCoachRecovery(){ $('#coachRecoveryModal').classList.add('hidden'); setStatus($('#coachRecoveryStatus')); }
+  function openPasswordReset(){
+    closeAuth(); closeCoachAuth(); closeCoachRecovery();
+    $('#passwordResetModal').classList.remove('hidden');
+    setStatus($('#passwordResetStatus'));
+    $('#newCoachPassword').value=''; $('#confirmCoachPassword').value='';
+    setTimeout(()=>$('#newCoachPassword').focus(),0);
+  }
+  function cleanRecoveryUrl(){
+    if(window.history?.replaceState) window.history.replaceState({},document.title,window.location.pathname);
+  }
+  async function coachSignIn(){
+    const email=$('#coachEmail').value.trim(),password=$('#coachPassword').value,status=$('#coachAuthStatus');
+    if(!/^\S+@\S+\.\S+$/.test(email)) return setStatus(status,'Enter a valid coach email address.','error');
+    if(!password) return setStatus(status,'Enter your password.','error');
+    setStatus(status,'Signing you in…');
+    const {data,error}=await client.auth.signInWithPassword({email,password});
+    if(error) return setStatus(status,'Email or password is incorrect.','error');
+    state.session=data.session;
+    const {data:isAdmin,error:roleError}=await client.rpc('is_admin');
+    if(roleError || !isAdmin){
+      await client.auth.signOut({scope:'local'}).catch(()=>{});
+      state.session=null;
+      await refreshIdentity();
+      return setStatus(status,'This sign-in is for the pronunciation coach only.','error');
+    }
+    await refreshIdentity();
+    closeCoachAuth();
+    $('#coachPassword').value='';
+    setView('admin');
+  }
+  async function sendCoachRecovery(){
+    const email=$('#coachRecoveryEmail').value.trim(),status=$('#coachRecoveryStatus');
+    if(!/^\S+@\S+\.\S+$/.test(email)) return setStatus(status,'Enter a valid email address.','error');
+    setStatus(status,'Sending your password reset link…');
+    const redirectTo=`${window.location.origin}${window.location.pathname}`;
+    const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo});
+    if(error){
+      console.error(error);
+      return setStatus(status,'We could not send the recovery email right now. Please try again.','error');
+    }
+    setStatus(status,'Check your inbox. If this address belongs to a coach account, a password reset link is on its way.','success');
+  }
+  async function saveNewCoachPassword(){
+    const password=$('#newCoachPassword').value,confirm=$('#confirmCoachPassword').value,status=$('#passwordResetStatus');
+    if(password.length<10) return setStatus(status,'Use a password with at least 10 characters.','error');
+    if(password!==confirm) return setStatus(status,'The two passwords do not match.','error');
+    setStatus(status,'Saving your new password…');
+    const {error}=await client.auth.updateUser({password});
+    if(error) return setStatus(status,error.message||'Could not update your password.','error');
+    const {data:isAdmin,error:roleError}=await client.rpc('is_admin');
+    cleanRecoveryUrl();
+    if(roleError || !isAdmin){
+      await client.auth.signOut({scope:'local'}).catch(()=>{});
+      state.session=null;
+      $('#passwordResetModal').classList.add('hidden');
+      await refreshIdentity();
+      showToast('Password updated, but this account does not have coach access. Learners should use email sign-in links.');
+      return;
+    }
+    setStatus(status,'Password saved. Opening your coach dashboard…','success');
+    await refreshIdentity();
+    setTimeout(()=>{ $('#passwordResetModal').classList.add('hidden'); setView('admin'); },500);
+  }
+  async function cancelPasswordReset(){
+    await client.auth.signOut({scope:'local'}).catch(()=>{});
+    state.session=null;
+    cleanRecoveryUrl();
+    $('#passwordResetModal').classList.add('hidden');
+    await refreshIdentity();
+    setView('current');
+  }
   async function requestSignInLink(){
     const email=$('#authEmail').value.trim(); const status=$('#authStatus');
     if(!/^\S+@\S+\.\S+$/.test(email)) return setStatus(status,'Enter a valid email address.','error');
