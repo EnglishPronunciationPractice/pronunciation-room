@@ -43,12 +43,12 @@
           <div class="trust-row"><span><i>✓</i> Human feedback</span><span><i>✓</i> Private corrections</span><span><i>✓</i> No public mistake scores</span></div>
         </div>
         <div class="hero-panel glass-card">
-          <div class="mini-heading"><span>Invite-only</span><span class="live-chip">Pronunciation first</span></div>
+          <div class="mini-heading"><span>Invite-only</span><span class="live-chip">British pronunciation</span></div>
           <ol class="process-list">
             <li><span>01</span><div><strong>Read the live passage</strong><small>Everyone works on the same current reading.</small></div></li>
             <li><span>02</span><div><strong>Record your first attempt</strong><small>Re-record privately until you are happy to submit.</small></div></li>
             <li><span>03</span><div><strong>Receive individual feedback</strong><small>Your focus words and corrections stay private.</small></div></li>
-            <li><span>04</span><div><strong>Watch your journey develop</strong><small>Profiles, retention, mastery and commitment update automatically.</small></div></li>
+            <li><span>04</span><div><strong>See your progress take shape</strong><small>Your Reader Profile, progress and commitment update as you practise.</small></div></li>
           </ol>
         </div>
       </div>
@@ -154,7 +154,7 @@
   </main>
 
   <div id="authModal" class="modal-shell hidden" role="dialog" aria-modal="true">
-    <div class="modal-backdrop" data-close-auth></div><div class="modal-card glass-card compact-modal"><button class="modal-close" data-close-auth>×</button><span class="eyebrow">Invite-only sign-in</span><h2>Return to your Pronunciation Room</h2><p>Enter the approved email address you were invited with. We’ll send a secure sign-in link. No password required.</p><label>Email address<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" /></label><button id="sendSignInButton" class="button button-primary full-width">Email my sign-in link</button><div id="authStatus" class="form-status"></div></div>
+    <div class="modal-backdrop" data-close-auth></div><div class="modal-card glass-card compact-modal"><button class="modal-close" data-close-auth>×</button><span class="eyebrow">Invite-only sign-in</span><h2>Return to your Pronunciation Room</h2><p>Enter the approved email address you were invited with. We’ll send a secure sign-in link. No password required.</p><label>Email address<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" /></label><button id="sendSignInButton" class="button button-primary full-width">Email my sign-in link</button><p class="form-status">If this email is registered and active, a secure sign-in link will be sent.</p><div id="authStatus" class="form-status"></div></div>
   </div>
 
   <div id="profileModal" class="modal-shell hidden" role="dialog" aria-modal="true">
@@ -163,7 +163,7 @@
 
   <div id="publicProfileModal" class="modal-shell hidden" role="dialog" aria-modal="true"><div class="modal-backdrop" data-close-public-profile></div><div id="publicProfileCard" class="modal-card glass-card public-profile-card"></div></div>
   <div id="toast" class="toast hidden" role="status"></div>
-  <footer class="footer shell"><span>The Pronunciation Room</span><button class="clean-button footer-link" data-view-target="journey">How progress works</button><span>British English · Modern RP</span></footer>
+  <footer class="footer shell"><span>The Pronunciation Room</span><button class="clean-button footer-link" data-view-target="journey">Your pronunciation journey</button><span>British English · Modern RP</span></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
